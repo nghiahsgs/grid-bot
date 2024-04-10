@@ -101,7 +101,7 @@ const AppLayout: React.FC<PropsWithChildren> = ({ children }) => {
           <div
             style={{
               padding: 24,
-              textAlign: "center",
+              textAlign: "end",
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
               minHeight: "calc(100vh - 178px)",

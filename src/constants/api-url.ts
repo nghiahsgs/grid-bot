@@ -1,5 +1,5 @@
 export const API_URL = {
-  ORDER: "/v1/orders/",
+  ORDER: "/v1/grids/",
 
   LOGIN: "/v1/users/login/",
   REGISTER: "/v1/users/register/",

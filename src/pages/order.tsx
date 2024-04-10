@@ -1,50 +1,27 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  Form,
-  Input,
-  InputNumber,
-  Popconfirm,
-  Table,
-  Typography,
-  SelectProps,
-  Select,
-} from "antd";
+import React, { useState } from "react";
+import { Button, Form, InputNumber, Popconfirm, Table, Typography } from "antd";
 import { OrderItem } from "@/types/order";
-import useGetOrder from "@/hooks/useGetOrders";
-import { useRecoilValue } from "recoil";
-import masterDataState from "@/stores/masterData";
+import { fakeDataOrderItem } from "@/mock/order";
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;
   dataIndex: string;
   title: any;
-  inputType: "number" | "text" | "select";
   record: OrderItem;
   index: number;
   children: React.ReactNode;
-  options?: SelectProps["options"];
 }
 
 const EditableCell: React.FC<EditableCellProps> = ({
   editing,
   dataIndex,
   title,
-  inputType,
   record,
   index,
   children,
-  options,
   ...restProps
 }) => {
-  const inputNode = (inputType: string) => {
-    if (inputType === "number") {
-      return <InputNumber />;
-    }
-    if (inputType === "select" && options) {
-      return <Select options={options} />;
-    }
-    return <Input />;
-  };
+  const inputNode = <InputNumber />;
 
   return (
     <td {...restProps}>
@@ -55,11 +32,11 @@ const EditableCell: React.FC<EditableCellProps> = ({
           rules={[
             {
               required: true,
-              message: `Please input ${title}!`,
+              message: `Please Input ${title}!`,
             },
           ]}
         >
-          {inputNode(inputType)}
+          {inputNode}
         </Form.Item>
       ) : (
         children
@@ -70,60 +47,18 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 const Order: React.FC = () => {
   const [form] = Form.useForm();
-  const { data: orderData } = useGetOrder();
-  const [data, setData] = useState(orderData || []);
-  const [editingKey, setEditingKey] = useState("");
-  const masterData = useRecoilValue(masterDataState);
-
-  useEffect(() => {
-    if (orderData) setData(orderData);
-  }, [orderData]);
-
-  const platformOptions: SelectProps["options"] = useMemo(() => {
-    const array = masterData?.shop_platform
-      ? masterData?.shop_platform.map((item) => ({
-          label: item,
-          value: item,
-        }))
-      : [];
-    return array;
-  }, [masterData]);
-
-  const supplyCompanyOptions: SelectProps["options"] = useMemo(() => {
-    const array = masterData?.supply_company
-      ? masterData?.supply_company.map((item) => ({
-          label: item,
-          value: item,
-        }))
-      : [];
-    return array;
-  }, [masterData]);
-
-  const paymentOptions: SelectProps["options"] = useMemo(() => {
-    const array = masterData?.payment_gateway
-      ? masterData?.payment_gateway.map((item) => ({
-          label: item,
-          value: item,
-        }))
-      : [];
-    return array;
-  }, [masterData]);
+  const [data, setData] = useState(fakeDataOrderItem);
+  const [editingKey, setEditingKey] = useState<number | undefined>(undefined);
 
   const isEditing = (record: OrderItem) => record.id === editingKey;
 
-  const edit = (record: Partial<OrderItem> & { id: string }) => {
-    form.setFieldsValue({
-      base_code: "",
-      designer_id: "",
-      designer_links: "",
-      raw_data: "",
-      ...record,
-    });
+  const edit = (record: Partial<OrderItem>) => {
+    form.setFieldsValue({ name: "", age: "", address: "", ...record });
     setEditingKey(record.id);
   };
 
   const cancel = () => {
-    setEditingKey("");
+    setEditingKey(undefined);
   };
 
   const save = async (key: React.Key) => {
@@ -132,7 +67,6 @@ const Order: React.FC = () => {
 
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.id);
-
       if (index > -1) {
         const item = newData[index];
         newData.splice(index, 1, {
@@ -140,11 +74,11 @@ const Order: React.FC = () => {
           ...row,
         });
         setData(newData);
-        setEditingKey("");
+        setEditingKey(undefined);
       } else {
         newData.push(row);
         setData(newData);
-        setEditingKey("");
+        setEditingKey(undefined);
       }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
@@ -153,62 +87,100 @@ const Order: React.FC = () => {
 
   const columns = [
     {
-      title: "Order ID",
-      dataIndex: "order_id",
+      title: "ID",
+      dataIndex: "id",
     },
     {
-      title: "Platform",
-      dataIndex: "platform",
+      title: "Coin Name",
+      dataIndex: "coin_name",
+    },
+    {
+      title: "Current Price",
+      dataIndex: "current_price",
+    },
+    {
+      title: "Amount",
+      dataIndex: "amount",
+    },
+    {
+      title: "Entry price",
       editable: true,
+      children: [
+        {
+          title: "Volume",
+          dataIndex: "entry_volume",
+          editable: true,
+        },
+        {
+          title: "Price",
+          dataIndex: "entry_price",
+          editable: true,
+        },
+      ],
     },
     {
-      title: "Shop name",
-      dataIndex: "shop_name",
-    },
-    {
-      title: "Sku",
-      dataIndex: "sku",
-    },
-    {
-      title: "Base cost",
-      dataIndex: "base_cost",
+      title: "DCA Price 1",
       editable: true,
+      children: [
+        {
+          title: "Volume",
+          dataIndex: "dca_volume_1",
+          editable: true,
+        },
+        {
+          title: "Price",
+          dataIndex: "dca_price_1",
+          editable: true,
+        },
+      ],
     },
     {
-      title: "Driver link",
-      dataIndex: "original_driver_link",
-    },
-    {
-      title: "Designer Name",
-      dataIndex: "designer_name",
+      title: "DCA Price 2",
       editable: true,
+      children: [
+        {
+          title: "Volume",
+          dataIndex: "dca_volume_2",
+          editable: true,
+        },
+        {
+          title: "Price",
+          dataIndex: "dca_price_2",
+          editable: true,
+        },
+      ],
     },
     {
-      title: "Designer link",
-      dataIndex: "designer_links",
+      title: "DCA Price 3",
       editable: true,
+      children: [
+        {
+          title: "Volume",
+          dataIndex: "dca_volume_3",
+          editable: true,
+        },
+        {
+          title: "Price",
+          dataIndex: "dca_price_3",
+          editable: true,
+        },
+      ],
     },
     {
-      title: "Data",
-      dataIndex: "raw_data",
-      editable: true,
+      title: "Take Profit",
+      dataIndex: "take_profit",
     },
     {
-      title: "Supply company",
-      dataIndex: "supply_company",
-      editable: true,
-    },
-    {
-      title: "Payment gateway",
-      dataIndex: "payment_gateway",
-      editable: true,
+      title: "Stop Loss",
+      dataIndex: "stop_loss",
     },
     {
       title: "",
+      width: "80px",
       render: (_: any, record: OrderItem) => {
         const editable = isEditing(record);
         return editable ? (
-          <span style={{ whiteSpace: "nowrap" }}>
+          <span>
             <Typography.Link
               onClick={() => save(record.id)}
               style={{ marginRight: 8 }}
@@ -221,7 +193,7 @@ const Order: React.FC = () => {
           </span>
         ) : (
           <Typography.Link
-            disabled={editingKey !== ""}
+            disabled={editingKey !== undefined}
             onClick={() => edit(record)}
           >
             Edit
@@ -231,59 +203,47 @@ const Order: React.FC = () => {
     },
   ];
 
-  const mergedColumns = columns.map((col) => {
+  const mapColumns = (col: any) => {
     if (!col.editable) {
       return col;
     }
-    return {
+    const newCol = {
       ...col,
       onCell: (record: OrderItem) => ({
         record,
-        inputType: getInputType(col.dataIndex),
+        editing: isEditing(record),
         dataIndex: col.dataIndex,
         title: col.title,
-        editing: isEditing(record),
-        options: getOptionData(col.dataIndex),
       }),
     };
-  });
-
-  const getInputType = (key: string) => {
-    if (
-      key === "platform" ||
-      key === "supply_company" ||
-      key === "payment_gateway"
-    ) {
-      return "select";
+    if (col.children) {
+      newCol.children = col.children.map(mapColumns);
     }
-    if (key === "base_cost") {
-      return "number";
-    }
-    return "text";
+    return newCol;
   };
 
-  const getOptionData = (key: string) => {
-    if (key === "platform") return platformOptions;
-    if (key === "supply_company") return supplyCompanyOptions;
-    if (key === "payment_gateway") return paymentOptions;
-    return undefined;
-  };
+  const mergedColumns = columns.map(mapColumns);
 
   return (
-    <Form form={form} component={false}>
-      <Table
-        components={{
-          body: {
-            cell: EditableCell,
-          },
-        }}
-        bordered
-        dataSource={data}
-        columns={mergedColumns}
-        rowClassName="editable-row"
-        pagination={false}
-      />
-    </Form>
+    <>
+      <Button onClick={() => {}} type="primary" style={{ marginBottom: 16 }}>
+        Add a new config
+      </Button>
+      <Form form={form} component={false}>
+        <Table
+          components={{
+            body: {
+              cell: EditableCell,
+            },
+          }}
+          bordered
+          dataSource={data}
+          columns={mergedColumns}
+          rowClassName="editable-row"
+          pagination={false}
+        />
+      </Form>
+    </>
   );
 };
 
