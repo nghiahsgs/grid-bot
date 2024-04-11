@@ -1,5 +1,6 @@
 export const API_URL = {
-  ORDER: "/v1/grids/",
+  GRIDS: "/v1/grids/",
+  CREATE_GRID: "/v1/grids/config",
 
   LOGIN: "/v1/users/login/",
   REGISTER: "/v1/users/register/",

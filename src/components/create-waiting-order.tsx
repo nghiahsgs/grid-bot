@@ -26,11 +26,11 @@ function CreateWaitingOrder() {
           icon={<PlusCircleOutlined />}
           onClick={showModal}
         >
-          Create
+          Create config
         </Button>
       </Container>
       <ModalWaitingOrder
-        title="Create order"
+        title="Create config"
         open={isModalOpen}
         handleOk={handleOk}
         handleCancel={handleCancel}
@@ -45,4 +45,5 @@ export default CreateWaitingOrder;
 const Container = styled.div`
   display: flex;
   justify-content: flex-end;
+  padding-bottom: 20px;
 `;

@@ -1,10 +1,11 @@
 import { LIST_COIN } from "@/constants/list-coin";
-import useActionWaitingOrder from "@/hooks/useActionWaitingOrder";
+import useCreateGrid from "@/hooks/useCreateGrid";
 import loadingState from "@/stores/loading";
-import { EOrderType, IOrder } from "@/types/order";
+import { CreateGrid } from "@/types/order";
 import {
   AutoComplete,
   Button,
+  Checkbox,
   Form,
   Input,
   InputNumber,
@@ -17,136 +18,88 @@ import { Controller, useForm } from "react-hook-form";
 import { useSetRecoilState } from "recoil";
 import styled from "styled-components";
 
-export interface IModalProps extends Omit<ModalProps, "title"> {
+export interface IModalProps extends ModalProps {
   handleOk: () => void;
   handleCancel: () => void;
-  title: "Update order" | "Create order";
-  data?: IOrder;
 }
 
-const initFormData = {
-  order_type: EOrderType.BUY,
-};
+const initFormData = {};
 
 const ModalWaitingOrder: React.FC<IModalProps> = ({
   handleOk,
   handleCancel,
-  data,
   ...props
 }) => {
   const setLoadingState = useSetRecoilState(loadingState);
   const [options, setOptions] = useState<Array<{ value: string }>>(LIST_COIN);
-  const { addOrder, updateOrder } = useActionWaitingOrder();
-  const { control, handleSubmit, reset } = useForm<IOrder>({
-    defaultValues: data || initFormData,
+  const createGrid = useCreateGrid();
+  const { control, handleSubmit, reset } = useForm<CreateGrid>({
+    defaultValues: initFormData,
   });
 
   const getPanelValue = (searchText: string) =>
     !searchText ? LIST_COIN : filterOption(searchText);
 
   const filterOption = (searchText: string) => {
-    const result = LIST_COIN.filter((item) =>
-      item.value
-        .replace("/USDT", "")
-        .toLowerCase()
-        .includes(searchText.toLowerCase())
+    const result = LIST_COIN.filter((item: any) =>
+      item.value.toLowerCase().includes(searchText.toLowerCase())
     );
     return result;
   };
 
-  const onSubmit = (data: IOrder) => {
-    const formatData = formatDataSubmit(data);
+  const onSubmit = (data: CreateGrid) => {
+    console.log({ onSubmit: data });
+    const formatData = data;
     setLoadingState(true);
-    if (props.title === "Create order") {
-      addOrder.mutate(formatData, {
-        onSuccess: () => {
-          handleOk();
-          reset();
-        },
-      });
-    } else {
-      updateOrder.mutate(formatData, {
-        onSuccess: () => {
-          handleOk();
-          reset();
-        },
-      });
-    }
-  };
-
-  const formatDataSubmit = (data: IOrder) => {
-    const newData = { ...data };
-    if (props.title === "Create order") {
-      const conditions = (newData.conditions as string).split(", ");
-      const coin_name = newData.coin_name.replace("/USDT", "");
-      return { ...newData, conditions, coin_name };
-    } else {
-      return newData;
-    }
+    createGrid.mutate(formatData, {
+      onSuccess: () => {
+        handleOk();
+        reset();
+      },
+    });
   };
 
   return (
     <Modal {...props} footer={null}>
       <Form name="order" onFinish={handleSubmit(onSubmit)}>
-        {props.title === "Create order" && (
-          <Form.Item label="Coin name">
-            <Controller
-              rules={{ required: "Please select coin name!" }}
-              name="coin_name"
-              control={control}
-              render={({ field, fieldState }) => (
-                <>
-                  <AutoComplete
-                    {...field}
-                    options={options}
-                    onSearch={(text) => setOptions(getPanelValue(text))}
-                  />
-                  <FormHelperText error={fieldState.error?.message}>
-                    {fieldState.error?.message}
-                  </FormHelperText>
-                </>
-              )}
-            />
-          </Form.Item>
-        )}
-        {props.title === "Create order" && (
-          <Form.Item label="Order type">
-            <Controller
-              name="order_type"
-              control={control}
-              render={({ field }) => (
-                <Radio.Group {...field}>
-                  <Radio value={EOrderType.BUY}>BUY</Radio>
-                  <Radio value={EOrderType.SELL}>SELL</Radio>
-                </Radio.Group>
-              )}
-            />
-          </Form.Item>
-        )}
-        {props.title === "Create order" && (
-          <Form.Item label="Conditions">
-            <Controller
-              rules={{ required: "Please input conditions!" }}
-              name="conditions"
-              control={control}
-              render={({ field, fieldState }) => (
-                <>
-                  <Input.TextArea
-                    {...field}
-                    value={field.value && field.value.toString()}
-                  />
-                  <FormHelperText error={fieldState.error?.message}>
-                    {fieldState.error?.message}
-                  </FormHelperText>
-                </>
-              )}
-            />
-          </Form.Item>
-        )}
-        <Form.Item label="Volume">
+        <Form.Item label="Coin name">
           <Controller
-            rules={{ required: "Please input volume!" }}
-            name="volume"
+            rules={{ required: "Please select coin name!" }}
+            name="coin_name"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <AutoComplete
+                  {...field}
+                  options={options}
+                  onSearch={(text) => setOptions(getPanelValue(text))}
+                />
+                <FormHelperText error={fieldState.error?.message}>
+                  {fieldState.error?.message}
+                </FormHelperText>
+              </>
+            )}
+          />
+        </Form.Item>
+        <Form.Item label="Candle stick">
+          <Controller
+            rules={{ required: "Please select candle stick!" }}
+            name="candle_stick"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <Input {...field} />
+                <FormHelperText error={fieldState.error?.message}>
+                  {fieldState.error?.message}
+                </FormHelperText>
+              </>
+            )}
+          />
+        </Form.Item>
+        <Form.Item label="Entry dropout min percent">
+          <Controller
+            rules={{ required: "Please input entry dropout min percent!" }}
+            name="entry_dropout_min_percent"
             control={control}
             render={({ field, fieldState }) => (
               <>
@@ -163,13 +116,77 @@ const ModalWaitingOrder: React.FC<IModalProps> = ({
             )}
           />
         </Form.Item>
-        <Form.Item label="Note">
+        <Form.Item label="DCA min percent">
           <Controller
-            name="note"
+            rules={{ required: "Please input dca min percent!" }}
+            name="dca_min_percent"
             control={control}
-            render={({ field }) => <Input.TextArea {...field} />}
+            render={({ field, fieldState }) => (
+              <>
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  {...field}
+                />
+                <FormHelperText error={fieldState.error?.message}>
+                  {fieldState.error?.message}
+                </FormHelperText>
+              </>
+            )}
           />
         </Form.Item>
+
+        <Form.Item label="DCA volume">
+          <Controller
+            rules={{ required: "Please input dca volume!" }}
+            name="dca_volume"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  {...field}
+                />
+                <FormHelperText error={fieldState.error?.message}>
+                  {fieldState.error?.message}
+                </FormHelperText>
+              </>
+            )}
+          />
+        </Form.Item>
+
+        <Form.Item label="Numbers of orders">
+          <Controller
+            rules={{ required: "Please input numbers of orders!" }}
+            name="numbers_of_orders"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <InputNumber
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  {...field}
+                />
+                <FormHelperText error={fieldState.error?.message}>
+                  {fieldState.error?.message}
+                </FormHelperText>
+              </>
+            )}
+          />
+        </Form.Item>
+
+        <Form.Item label="Auto create next order">
+          <Controller
+            name="auto_create_next_order"
+            control={control}
+            render={({ field }) => <Checkbox {...field} />}
+          />
+        </Form.Item>
+
         <BottomButton>
           <Form.Item>
             <Button style={{ width: "100%" }} onClick={handleCancel}>
@@ -178,7 +195,7 @@ const ModalWaitingOrder: React.FC<IModalProps> = ({
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
-              {props.title}
+              Create
             </Button>
           </Form.Item>
         </BottomButton>

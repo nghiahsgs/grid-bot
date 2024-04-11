@@ -1,4 +1,4 @@
-export interface OrderItem {
+export interface GridItem {
   id: number;
   coin_name: string;
   current_price: number;
@@ -24,7 +24,7 @@ export interface OrderItem {
   updated_at: string;
 }
 
-export interface CreateOrder {
+export interface CreateGrid {
   coin_name: string;
   candle_stick: string;
   entry_dropout_min_percent: number;

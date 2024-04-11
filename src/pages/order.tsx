@@ -1,13 +1,22 @@
-import React, { useState } from "react";
-import { Button, Form, InputNumber, Popconfirm, Table, Typography } from "antd";
-import { OrderItem } from "@/types/order";
-import { fakeDataOrderItem } from "@/mock/order";
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Form,
+  InputNumber,
+  Popconfirm,
+  Table,
+  Tag,
+  Typography,
+} from "antd";
+import { GridItem } from "@/types/order";
+import CreateWaitingOrder from "@/components/create-waiting-order";
+import useGetGrids from "@/hooks/useGetGrids";
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;
   dataIndex: string;
   title: any;
-  record: OrderItem;
+  record: GridItem;
   index: number;
   children: React.ReactNode;
 }
@@ -46,13 +55,18 @@ const EditableCell: React.FC<EditableCellProps> = ({
 };
 
 const Order: React.FC = () => {
+  const grids = useGetGrids();
   const [form] = Form.useForm();
-  const [data, setData] = useState(fakeDataOrderItem);
+  const [data, setData] = useState<Array<GridItem>>([]);
   const [editingKey, setEditingKey] = useState<number | undefined>(undefined);
 
-  const isEditing = (record: OrderItem) => record.id === editingKey;
+  useEffect(() => {
+    setData(grids.data ?? []);
+  }, [grids.data]);
 
-  const edit = (record: Partial<OrderItem>) => {
+  const isEditing = (record: GridItem) => record.id === editingKey;
+
+  const edit = (record: Partial<GridItem>) => {
     form.setFieldsValue({ name: "", age: "", address: "", ...record });
     setEditingKey(record.id);
   };
@@ -63,7 +77,7 @@ const Order: React.FC = () => {
 
   const save = async (key: React.Key) => {
     try {
-      const row = (await form.validateFields()) as OrderItem;
+      const row = (await form.validateFields()) as GridItem;
 
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.id);
@@ -110,6 +124,9 @@ const Order: React.FC = () => {
           title: "Volume",
           dataIndex: "entry_volume",
           editable: true,
+          render: (value: any, { is_run_entry }: any) => (
+            <Tag color={is_run_entry ? "success" : "default"}>{value}</Tag>
+          ),
         },
         {
           title: "Price",
@@ -126,6 +143,9 @@ const Order: React.FC = () => {
           title: "Volume",
           dataIndex: "dca_volume_1",
           editable: true,
+          render: (value: any, { is_run_dca_1 }: any) => (
+            <Tag color={is_run_dca_1 ? "success" : "default"}>{value}</Tag>
+          ),
         },
         {
           title: "Price",
@@ -142,6 +162,9 @@ const Order: React.FC = () => {
           title: "Volume",
           dataIndex: "dca_volume_2",
           editable: true,
+          render: (value: any, { is_run_dca_2 }: any) => (
+            <Tag color={is_run_dca_2 ? "success" : "default"}>{value}</Tag>
+          ),
         },
         {
           title: "Price",
@@ -158,6 +181,9 @@ const Order: React.FC = () => {
           title: "Volume",
           dataIndex: "dca_volume_3",
           editable: true,
+          render: (value: any, { is_run_dca_3 }: any) => (
+            <Tag color={is_run_dca_3 ? "success" : "default"}>{value}</Tag>
+          ),
         },
         {
           title: "Price",
@@ -177,7 +203,7 @@ const Order: React.FC = () => {
     {
       title: "",
       width: "80px",
-      render: (_: any, record: OrderItem) => {
+      render: (_: any, record: GridItem) => {
         const editable = isEditing(record);
         return editable ? (
           <span>
@@ -209,7 +235,7 @@ const Order: React.FC = () => {
     }
     const newCol = {
       ...col,
-      onCell: (record: OrderItem) => ({
+      onCell: (record: GridItem) => ({
         record,
         editing: isEditing(record),
         dataIndex: col.dataIndex,
@@ -226,9 +252,7 @@ const Order: React.FC = () => {
 
   return (
     <>
-      <Button onClick={() => {}} type="primary" style={{ marginBottom: 16 }}>
-        Add a new config
-      </Button>
+      <CreateWaitingOrder />
       <Form form={form} component={false}>
         <Table
           components={{
@@ -237,6 +261,7 @@ const Order: React.FC = () => {
             },
           }}
           bordered
+          loading={grids.isLoading || grids.isFetching}
           dataSource={data}
           columns={mergedColumns}
           rowClassName="editable-row"

@@ -12,9 +12,9 @@ import useGetUserInfo from "@/hooks/useGetUserInfo";
 const { Header, Content, Footer, Sider } = Layout;
 
 const AppLayout: React.FC<PropsWithChildren> = ({ children }) => {
-  const { data } = useGetMaster();
-  const { data: user } = useGetUserInfo();
-  const setMasterData = useSetRecoilState(masterDataState);
+  // const { data } = useGetMaster();
+  // const { data: user } = useGetUserInfo();
+  // const setMasterData = useSetRecoilState(masterDataState);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -31,11 +31,11 @@ const AppLayout: React.FC<PropsWithChildren> = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (data) {
-      setMasterData(data);
-    }
-  }, [data, setMasterData]);
+  // useEffect(() => {
+  //   if (data) {
+  //     setMasterData(data);
+  //   }
+  // }, [data, setMasterData]);
 
   const handleNavigateWhenMount = (path?: string) => {
     let pathToEnum: EMenu;
@@ -92,7 +92,7 @@ const AppLayout: React.FC<PropsWithChildren> = ({ children }) => {
             gap: "10px",
           }}
         >
-          <Typography.Text strong>{user?.username || ""}</Typography.Text>
+          {/* <Typography.Text strong>{user?.username || ""}</Typography.Text> */}
           <Button type="primary" onClick={handleLogout}>
             Logout
           </Button>

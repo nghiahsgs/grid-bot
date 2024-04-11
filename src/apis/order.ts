@@ -1,9 +1,14 @@
 import { API_URL } from "@/constants/api-url";
 
 import api from "./config";
-import { OrderItem } from "@/types/order";
+import { CreateGrid, GridItem } from "@/types/order";
 
-export const getListOrder = async () => {
-  const response = await api.get<Array<OrderItem>>(API_URL.ORDER);
+export const getGrids = async () => {
+  const response = await api.get<Array<GridItem>>(API_URL.GRIDS);
+  return response.data;
+};
+
+export const createGrids = async (body: CreateGrid) => {
+  const response = await api.post(API_URL.CREATE_GRID, body);
   return response.data;
 };
