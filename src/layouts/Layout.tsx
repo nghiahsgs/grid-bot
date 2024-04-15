@@ -46,9 +46,9 @@ const AppLayout: React.FC<PropsWithChildren> = ({ children }) => {
       // case "balance":
       //   pathToEnum = EMenu.BALANCE;
       //   break;
-      // case "settings":
-      //   pathToEnum = EMenu.SETTINGS;
-      //   break;
+      case "settings":
+        pathToEnum = EMenu.SETTINGS;
+        break;
       default:
         pathToEnum = EMenu.ORDER;
     }

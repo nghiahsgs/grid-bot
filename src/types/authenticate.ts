@@ -10,4 +10,8 @@ export interface IUser {
   user_role: string;
 }
 
-export interface IRegister extends ILogin {}
+export interface IRegister extends ILogin {
+  access_key: string;
+  secret_key: string;
+  group_telegram_chat_id: string;
+}

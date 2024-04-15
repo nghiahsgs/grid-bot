@@ -12,26 +12,9 @@ import { useSetRecoilState } from "recoil";
 import masterDataState from "@/stores/masterData";
 
 function Register() {
-  const { data } = useGetMaster();
-  const setMasterData = useSetRecoilState(masterDataState);
   const { control, handleSubmit } = useForm<IRegister>();
   const { register } = useAuthentication();
   const route = useRouter();
-  const roleOptions: SelectProps["options"] = useMemo(() => {
-    const array = data?.user_role
-      ? data?.user_role.map((item) => ({
-          label: item,
-          value: item,
-        }))
-      : [];
-    return array;
-  }, [data]);
-
-  useEffect(() => {
-    if (data) {
-      setMasterData(data);
-    }
-  }, [data, setMasterData]);
 
   const onSubmit = (data: IRegister) => {
     register.mutate(data, { onSuccess: () => route.push(ROUTES.LOGIN) });
@@ -92,16 +75,40 @@ function Register() {
         </Form.Item>
         <Form.Item>
           <Controller
-            rules={{ required: "Please select role!" }}
-            name="user_role"
+            rules={{ required: "Please input your access key!" }}
+            name="access_key"
             control={control}
             render={({ field, fieldState }) => (
               <>
-                <Select options={roleOptions} {...field} />
+                <Input placeholder="Access Key" {...field} />
                 <FormHelperText error={fieldState.error?.message}>
                   {fieldState.error?.message}
                 </FormHelperText>
               </>
+            )}
+          />
+        </Form.Item>
+        <Form.Item>
+          <Controller
+            rules={{ required: "Please input your secret key!" }}
+            name="secret_key"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <Input placeholder="Secret Key" {...field} />
+                <FormHelperText error={fieldState.error?.message}>
+                  {fieldState.error?.message}
+                </FormHelperText>
+              </>
+            )}
+          />
+        </Form.Item>
+        <Form.Item>
+          <Controller
+            name="group_telegram_chat_id"
+            control={control}
+            render={({ field }) => (
+              <Input placeholder="Group telegram id" {...field} />
             )}
           />
         </Form.Item>

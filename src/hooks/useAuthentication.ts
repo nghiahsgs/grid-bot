@@ -11,8 +11,9 @@ function useAuthentication() {
     },
   });
   const login = useMutation(loginAccount, {
-    onSuccess: () => {
+    onSuccess: (data) => {
       setLoadingState(false);
+      console.log({ data });
     },
   });
   return { register, login };
