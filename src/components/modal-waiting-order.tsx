@@ -12,9 +12,11 @@ import {
   Modal,
   ModalProps,
   Radio,
+  Select,
 } from "antd";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useQueryClient } from "react-query";
 import { useSetRecoilState } from "recoil";
 import styled from "styled-components";
 
@@ -30,6 +32,7 @@ const ModalWaitingOrder: React.FC<IModalProps> = ({
   handleCancel,
   ...props
 }) => {
+  const queryClient = useQueryClient();
   const setLoadingState = useSetRecoilState(loadingState);
   const [options, setOptions] = useState<Array<{ value: string }>>(LIST_COIN);
   const createGrid = useCreateGrid();
@@ -53,6 +56,7 @@ const ModalWaitingOrder: React.FC<IModalProps> = ({
     setLoadingState(true);
     createGrid.mutate(formatData, {
       onSuccess: () => {
+        queryClient.removeQueries(["list-grid"]);
         handleOk();
         reset();
       },
@@ -88,7 +92,11 @@ const ModalWaitingOrder: React.FC<IModalProps> = ({
             control={control}
             render={({ field, fieldState }) => (
               <>
-                <Input {...field} />
+                <Select {...field} allowClear>
+                  <Select.Option value="1H">1H</Select.Option>
+                  <Select.Option value="4H">4H</Select.Option>
+                  <Select.Option value="1D">1D</Select.Option>
+                </Select>
                 <FormHelperText error={fieldState.error?.message}>
                   {fieldState.error?.message}
                 </FormHelperText>
